@@ -43,7 +43,6 @@ document.title = "社交媒体平台-登录";
 
 import router from "@/router/index.js"
 import {reactive, ref} from 'vue'
-import store from '@/store'
 import request from "@/request/request"
 import { ElMessage } from 'element-plus'
 import { User,Lock } from '@element-plus/icons-vue'
@@ -81,8 +80,9 @@ async function login(){
             message: res.data.msg ? res.data.msg : "登录成功！",
             type: 'success',
         });
-        store.commit('setToken',res.data.token);
-        store.commit('setUser',res.data.user);
+        let userInfo = JSON.stringify(res.data.user);
+        localStorage.setItem("token",res.data.token)
+        localStorage.setItem("userInfo",userInfo)
         loading.value = false
         router.push('/home')
     }).catch(err => {

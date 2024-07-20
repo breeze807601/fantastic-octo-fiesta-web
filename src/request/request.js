@@ -8,7 +8,7 @@ const instance = axios.create({baseURL})
 instance.interceptors.request.use(
     config => {
         if (localStorage.getItem('token')){
-            config.headers.Authorization = store.getters.getToken;
+            config.headers.Authorization = localStorage.getItem('token');
         }
         return config;
       },
@@ -29,7 +29,8 @@ instance.interceptors.response.use(
     err=>{
         if (err.response.status == 401) {
             // token过期
-            store.commit('delInfo')
+            // store.commit('delInfo')
+            localStorage.clear()
             ElMessage({
                 message: "请先登录!!!",
                 type: 'error',

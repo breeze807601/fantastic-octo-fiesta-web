@@ -1,9 +1,20 @@
 <template>
     <div>
-        <el-card style="margin-bottom: 20px">
-            发动态
-        </el-card>
-        <treads-list ></treads-list>
+        <el-row>
+            <el-col :span="6" :offset="1">
+                <el-card>
+                    hello
+                </el-card>
+            </el-col>
+            <el-col :span="14" :offset="2">
+                <el-card style="margin-bottom: 20px">
+
+                    <el-input v-model="textarea" style="width: 100%" :rows="3" type="textarea" placeholder="有什么新鲜事想分享给大家"/>
+                </el-card>
+                <treads-list ></treads-list>
+            </el-col>
+
+        </el-row>
         <!-- <el-row>
             <el-col :span="9" :offset="6">
                 <treads-list ></treads-list>
@@ -21,10 +32,10 @@ import TreadsList from './TreadsList.vue'
 
 //测试
 get()
-const user = reactive({})
+let user = reactive({})
 async function get(){
     await request.get("/user/getUser").then(res => {
-        Object.assign(user, res.data)
+        user = res.data
         // console.log('user',user[0].id);
     }).catch(err => {
         ElMessage({

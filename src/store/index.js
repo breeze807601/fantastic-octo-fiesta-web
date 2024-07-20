@@ -8,6 +8,7 @@ const store = createStore({
   },
   getters: {
     getToken(state){
+
       return localStorage.getItem('token');
     },
     getUser(state){
@@ -23,11 +24,14 @@ const store = createStore({
     },
     setUser(state,user){
       state.userInfo = user;
+      localStorage.removeItem("userInfo");
+      localStorage.setItem("userInfo",user)
     },
     delInfo(state) {
       state.token = "";
       state.userInfo = {};
       localStorage.removeItem("token");
+      localStorage.removeItem("userInfo")
     },
   },
   actions: {

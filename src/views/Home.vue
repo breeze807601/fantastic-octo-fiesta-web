@@ -22,13 +22,15 @@
                         </template>
                     </el-input>
                 </el-col>
-                <el-col :span="1" :offset="6">
-                    
+                <el-col :span="1" :offset="7">
+                    <el-tooltip effect="light" content="发送动态" placement="bottom" >
+                        <el-button style="margin-top: 10px;" color="#337ecc" :dark="isDark" :icon="EditPen" size="large" circle plain/>
+                    </el-tooltip>
                 </el-col>
-                <el-col :span="1" :offset="8">
+                <el-col :span="1">
                     <el-dropdown trigger="click">
-                        <el-avatar :size="40" style="margin-top: 10px; cursor: pointer;" @error="true">
-                            <img src="https://homework1015.oss-cn-beijing.aliyuncs.com/2024-07-08-15-08-281.png" />
+                        <el-avatar :size="40" style="margin-top: 10px; cursor: pointer;border: 2px solid #dedfe0" @error="true">
+                            <img :src="userInfo.pic" />
                         </el-avatar>
                         <template #dropdown>
                             <el-dropdown-menu>
@@ -42,15 +44,15 @@
         </el-header>
         <el-main>
             <el-row>
-                <el-col :span="4" :offset="2">
-                    <el-card>
-                        hello
-                    </el-card>
-                </el-col>
-                <el-col :span="8" :offset="1">
+<!--                <el-col :span="4" :offset="2">-->
+<!--                    <el-card>-->
+<!--                        hello-->
+<!--                    </el-card>-->
+<!--                </el-col>-->
+                <el-col :span="16" :offset="1">
                     <router-view />
                 </el-col>
-                <el-col :span="6" :offset="1">
+                <el-col :span="5" :offset="1">
                     <el-card>
                         广告
                     </el-card>
@@ -71,12 +73,15 @@
 document.title = "社交媒体平台-主页";
 
 import request from '@/request/request'
-import store from '@/store'
 import { ElMessage } from 'element-plus'
-import { Search } from '@element-plus/icons-vue'
+import { Search,EditPen } from '@element-plus/icons-vue'
 import router from '@/router';
-import { ref } from 'vue';
+import {reactive, ref} from 'vue';
 
+let userInfo = reactive({})
+
+userInfo = JSON.parse(localStorage.getItem("userInfo"));
+console.log("user",userInfo)
 
 const activeIndex = ref('1')
 function handleSelect(key) {
@@ -96,7 +101,8 @@ function handleSelect(key) {
 const search = ref('')
 
 function logOut(){
-    store.commit('delInfo')
+    // store.commit('delInfo')
+    localStorage.clear();
     ElMessage.success('退出登录成功！')
     router.push('/')
 }

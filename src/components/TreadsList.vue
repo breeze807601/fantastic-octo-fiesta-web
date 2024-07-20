@@ -19,6 +19,12 @@
 
 <script setup>
 
+import {reactive} from "vue";
+
+// let user = reactive({})
+// user = localStorage.getItem("userInfo")
+// console.log("user",user)
+
 </script>
 
 <style>

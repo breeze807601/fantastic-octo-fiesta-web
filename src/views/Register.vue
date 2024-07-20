@@ -65,7 +65,7 @@ import { ElMessage } from 'element-plus'
 import { User,Lock,Grape,Iphone,CreditCard } from '@element-plus/icons-vue';
 import {reactive, ref} from 'vue';
 
-const user = reactive({
+let user = reactive({
     username: '',
     password: '',
     pw:'',
@@ -107,7 +107,6 @@ async function register(){
         return;
     }
     await request.post("/user/register",user).then(res => {
-        console.log("res",res);
         ElMessage.success('注册成功!')
         loading.value = false;
         toLogin();
