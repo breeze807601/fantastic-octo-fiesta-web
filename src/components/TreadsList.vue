@@ -1,5 +1,5 @@
 <template>
-    <el-card>
+    <el-card shadow="never" style="margin-bottom: 10px">
         <template #header>
             <div class="card-header">
                 <el-avatar :size="35" style="cursor: pointer;" @error="true">

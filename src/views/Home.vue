@@ -1,12 +1,12 @@
 <template>
     <el-container>
-        <el-header>
+        <el-header class="el-header" style="background-color: white">
             <!-- 头部标签栏内容 -->
-            <el-row>
+            <el-row >
                 <el-col :span="2">
                     <img src="../assets/logo.jpg" alt="Logo" style="height: 60px; width: 140px;">
                 </el-col>
-                <el-col :span="9">
+                <el-col :span="7">
                     <div>
                         <el-menu :default-active="activeIndex" mode="horizontal" @select="handleSelect">
                             <el-menu-item index="1"><el-icon><HomeFilled /></el-icon>首页</el-menu-item>
@@ -15,40 +15,39 @@
                         </el-menu>
                     </div>
                 </el-col>
-                <el-col :span="4">
+                <el-col :span="6">
                     <el-input placeholder="搜索..." v-model="search" size="large" clearable style="margin-top: 10px">
                         <template #append>
                             <el-button :icon="Search" @click="handleSearch"></el-button>
                         </template>
                     </el-input>
                 </el-col>
-                <el-col :span="1" :offset="7">
-                    <el-tooltip effect="light" content="发送动态" placement="bottom" >
-                        <el-button style="margin-top: 10px;" color="#337ecc" :dark="isDark" :icon="EditPen" size="large" circle plain/>
-                    </el-tooltip>
+                <el-col :span="1" :offset="1">
+                    <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
+                        <el-tooltip effect="light" content="发送动态" placement="bottom" >
+                            <el-button @click="dialogVisible = true" style="margin-bottom: 5px;" color="#337ecc" :icon="EditPen" size="large" circle plain/>
+                        </el-tooltip>
+                    </div>
                 </el-col>
-                <el-col :span="1">
-                    <el-dropdown trigger="click">
-                        <el-avatar :size="40" style="margin-top: 10px; cursor: pointer;border: 2px solid #dedfe0" @error="true">
-                            <img :src="userInfo.pic" />
-                        </el-avatar>
-                        <template #dropdown>
-                            <el-dropdown-menu>
-                                <el-dropdown-item @click="goToProfile">个人中心</el-dropdown-item>
-                                <el-dropdown-item divided @click="logOut()">退出登录</el-dropdown-item>
-                            </el-dropdown-menu>
-                        </template>
-                    </el-dropdown>
+                <el-col :span="1" :offset="6">
+                    <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
+                        <el-dropdown trigger="click">
+                            <el-avatar :size="40" style="margin-bottom: 5px;cursor: pointer;border: 2px solid #dedfe0" @error="true">
+                                <img :src="userInfo.pic" />
+                            </el-avatar>
+                            <template #dropdown>
+                                <el-dropdown-menu>
+                                    <el-dropdown-item @click="goToProfile">个人中心</el-dropdown-item>
+                                    <el-dropdown-item divided @click="logOut()">退出登录</el-dropdown-item>
+                                </el-dropdown-menu>
+                            </template>
+                        </el-dropdown>
+                    </div>
                 </el-col>
             </el-row>
         </el-header>
-        <el-main>
+        <el-main style="background-color: #f5f5f5;">
             <el-row>
-<!--                <el-col :span="4" :offset="2">-->
-<!--                    <el-card>-->
-<!--                        hello-->
-<!--                    </el-card>-->
-<!--                </el-col>-->
                 <el-col :span="16" :offset="1">
                     <router-view />
                 </el-col>
@@ -64,25 +63,34 @@
                     </el-card>
                 </el-col>
             </el-row>
-            <!-- <router-view /> -->
         </el-main>
     </el-container>
+    <!--发布动态弹窗-->
+    <el-dialog v-model="dialogVisible" :before-close="beforeClose" title="发布动态" width="40%" center destroy-on-close>
+        <edit />
+    </el-dialog>
+    <!--回到顶部-->
+    <el-tooltip effect="light" content="回到顶部" placement="top" >
+        <el-backtop :right="100" :bottom="100" />
+    </el-tooltip>
 </template>
 
 <script setup>
 document.title = "社交媒体平台-主页";
 
 import request from '@/request/request'
-import { ElMessage } from 'element-plus'
+import { ElMessage,ElMessageBox } from 'element-plus'
 import { Search,EditPen } from '@element-plus/icons-vue'
 import router from '@/router';
 import {reactive, ref} from 'vue';
+import Edit from '../components/Edit.vue'
 
+// 登录用户信息
 let userInfo = reactive({})
-
 userInfo = JSON.parse(localStorage.getItem("userInfo"));
 console.log("user",userInfo)
 
+// 标签切换页面
 const activeIndex = ref('1')
 function handleSelect(key) {
     // 根据 key 的值来决定跳转到哪个路由
@@ -98,25 +106,38 @@ function handleSelect(key) {
     }
 }
 
-const search = ref('')
+const search = ref('')  // 搜索内容
 
-function logOut(){
-    // store.commit('delInfo')
-    localStorage.clear();
-    ElMessage.success('退出登录成功！')
-    router.push('/')
+const dialogVisible = ref(false);  // 是否弹出发送动态编辑框
+function beforeClose(){  // 关闭动态编辑前提醒是否确认关闭
+    ElMessageBox.confirm(
+        '关闭之后将不会保存编辑，确认关闭？',
+        '提示',
+        {confirmButtonText: '确定',cancelButtonText: '取消',type: 'warning',}
+    ).then(() => {
+        dialogVisible.value = false
+    })
 }
-// 测试
-// get()
-// async function get(){
 
-//     const res = await request.get("/user/getUser")
-// }
+function logOut(){  // 登出
+    ElMessageBox.confirm(
+        '是否确认退出登录？',
+        '提示',
+        {confirmButtonText: '确定',cancelButtonText: '取消',type: 'warning',}
+    ).then(() => {
+        localStorage.clear();
+        ElMessage.success('退出登录成功！')
+        router.push('/')
+    })
+}
 </script>
 
 <style>
 .el-header {
-  padding: 0 !important; /* 清除默认的内边距 */
-  border-bottom: 1px solid #dcdfe6; /* 添加下边框，颜色和宽度可以自定义 */
+    padding: 0 !important;
+    border-bottom: 1px solid #dcdfe6;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
 }
 </style>

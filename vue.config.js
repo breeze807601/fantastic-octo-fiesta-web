@@ -3,6 +3,9 @@ module.exports = defineConfig({
   transpileDependencies: true,
   lintOnSave: false,
   devServer:{
+    client: {
+      overlay: false
+    },
     proxy: {
       '/api': {
         target: 'http://localhost:4090', // 目标地址

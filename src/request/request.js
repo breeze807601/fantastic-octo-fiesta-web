@@ -12,8 +12,7 @@ instance.interceptors.request.use(
         }
         return config;
       },
-      error => {
-        // 对请求错误做些什么
+    error => {
         return Promise.reject(error);
     }
 )

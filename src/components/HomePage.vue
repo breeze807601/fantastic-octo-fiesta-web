@@ -7,10 +7,12 @@
                 </el-card>
             </el-col>
             <el-col :span="14" :offset="2">
-                <el-card style="margin-bottom: 20px">
-
-                    <el-input v-model="textarea" style="width: 100%" :rows="3" type="textarea" placeholder="有什么新鲜事想分享给大家"/>
-                </el-card>
+                <edit/>
+                <treads-list ></treads-list>
+                <treads-list ></treads-list>
+                <treads-list ></treads-list>
+                <treads-list ></treads-list>
+                <treads-list ></treads-list>
                 <treads-list ></treads-list>
             </el-col>
 
@@ -28,6 +30,7 @@ import request from '@/request/request'
 import { reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import TreadsList from './TreadsList.vue'
+import edit from './Edit.vue'
 
 
 //测试
@@ -48,4 +51,5 @@ async function get(){
 </script>
 
 <style>
+
 </style>
