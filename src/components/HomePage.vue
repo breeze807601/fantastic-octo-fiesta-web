@@ -9,19 +9,8 @@
             <el-col :span="14" :offset="2">
                 <edit/>
                 <treads-list ></treads-list>
-                <treads-list ></treads-list>
-                <treads-list ></treads-list>
-                <treads-list ></treads-list>
-                <treads-list ></treads-list>
-                <treads-list ></treads-list>
             </el-col>
-
         </el-row>
-        <!-- <el-row>
-            <el-col :span="9" :offset="6">
-                <treads-list ></treads-list>
-            </el-col>
-        </el-row> -->
     </div>
 </template>
 

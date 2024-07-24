@@ -46,7 +46,7 @@
                 </el-col>
             </el-row>
         </el-header>
-        <el-main style="background-color: #f5f5f5;">
+        <el-main style="flex: 1;background-color: #f5f5f5;">
             <el-row>
                 <el-col :span="16" :offset="1">
                     <router-view />
@@ -133,6 +133,12 @@ function logOut(){  // 登出
 </script>
 
 <style>
+.el-container {
+    display: flex;
+    flex-direction: column;
+    /* 至少占据视口高度 */
+    min-height: 100vh;
+}
 .el-header {
     padding: 0 !important;
     border-bottom: 1px solid #dcdfe6;

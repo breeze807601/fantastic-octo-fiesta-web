@@ -10,20 +10,29 @@
                     <span class="time">2024-07-19 16:46</span>
                 </div>
                 <div class="right-content">
-                    <el-button color="#f89898" :dark="isDark" round plain>+ 关注</el-button>
+                    <el-button color="#f89898" round plain>+ 关注</el-button>
                 </div>
             </div>
         </template>
+        <div>
+
+        </div>
     </el-card>
 </template>
 
 <script setup>
 
+import request from "@/request/request";
 import {reactive} from "vue";
 
-// let user = reactive({})
-// user = localStorage.getItem("userInfo")
-// console.log("user",user)
+// 登录用户信息
+let userInfo = reactive({})
+userInfo = JSON.parse(localStorage.getItem("userInfo"));
+console.log("user",userInfo)
+
+// 模拟添加动态
+// await new Promise(resolve => setTimeout(resolve, 2000));
+
 
 </script>
 
@@ -32,17 +41,14 @@ import {reactive} from "vue";
     display: flex;
     align-items: center;
 }
-
 .info {
     margin-left: 13px;
 }
-
 .nickname {
     display: block;
     font-weight: bold;
     font-size: 14px; /* 调整字体大小 */
 }
-
 .time {
     margin-top: 5px;
     display: block;
