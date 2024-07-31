@@ -21,7 +21,7 @@
             <!--上传图片和发表动态-->
             <div style="display: flex;justify-content: space-between;">
                 <div style="flex: 1">
-                    <el-popover :visible="popover" placement="left" :width="500" class="custom-popper">
+                    <el-popover :visible="popover" placement="bottom" :width="500" class="custom-popper">
                         <el-upload :http-request="httpRequest" :on-remove="handleRemove" :show-file-list="true"
                                    multiple list-type="picture-card" :on-exceed="onExceed" :limit="9" >
                             <template #trigger>
@@ -72,7 +72,6 @@ async function getTagList(){
 }
 async function addTag(){   // 添加标签方法
     await request.post('/tag',{name:optionName.value}).then(res => {
-
         optionName.value = '';
         isAdding.value = false;
         console.log("addT",res)
@@ -124,7 +123,8 @@ async function addTreads(){  // 添加动态
         tread.content = '';
         tread.image = [];
         tread.treadsTagList = [];
-        fileList.value = [];
+        // fileList.value = [];
+        fileList.value.splice(0, fileList.value.length);
         ElMessage.success(res.data.msg? res.data.msg : '发表成功!')
     })
     loading.value = false;

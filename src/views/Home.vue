@@ -16,9 +16,9 @@
                     </div>
                 </el-col>
                 <el-col :span="6">
-                    <el-input placeholder="搜索..." v-model="search" size="large" clearable style="margin-top: 10px">
+                    <el-input placeholder="搜索..." v-model="searchInfo" @keyup.enter.native="search" size="large" clearable style="margin-top: 10px">
                         <template #append>
-                            <el-button :icon="Search" @click="handleSearch"></el-button>
+                            <el-button :icon="Search" @click="search"></el-button>
                         </template>
                     </el-input>
                 </el-col>
@@ -37,7 +37,7 @@
                             </el-avatar>
                             <template #dropdown>
                                 <el-dropdown-menu>
-                                    <el-dropdown-item @click="goToProfile">个人中心</el-dropdown-item>
+                                    <el-dropdown-item @click="goToWebpage">个人中心</el-dropdown-item>
                                     <el-dropdown-item divided @click="logOut()">退出登录</el-dropdown-item>
                                 </el-dropdown-menu>
                             </template>
@@ -80,15 +80,24 @@ document.title = "社交媒体平台-主页";
 
 import request from '@/request/request'
 import { ElMessage,ElMessageBox } from 'element-plus'
-import { Search,EditPen } from '@element-plus/icons-vue'
+import {Search, EditPen, Refresh} from '@element-plus/icons-vue'
 import router from '@/router';
-import {reactive, ref} from 'vue';
-import Edit from '../components/Edit.vue'
+import {onMounted, onUnmounted, reactive, ref} from 'vue';
+import Edit from '../components/treadRelational/Edit.vue'
 
 // 登录用户信息
-let userInfo = reactive({})
-userInfo = JSON.parse(localStorage.getItem("userInfo"));
-console.log("user",userInfo)
+let userInfo = reactive(JSON.parse(localStorage.getItem("userInfo")));
+
+// 搜索相关
+const searchInfo = ref('')  // 搜索内容
+onUnmounted(() => {
+    window.removeEventListener('search', () => {});
+});
+function search() {
+    localStorage.setItem("searchInfo",searchInfo.value)
+    const event = new CustomEvent("search", { detail: searchInfo.value})
+    window.dispatchEvent(event);
+}
 
 // 标签切换页面
 const activeIndex = ref('1')
@@ -106,8 +115,6 @@ function handleSelect(key) {
     }
 }
 
-const search = ref('')  // 搜索内容
-
 const dialogVisible = ref(false);  // 是否弹出发送动态编辑框
 function beforeClose(){  // 关闭动态编辑前提醒是否确认关闭
     ElMessageBox.confirm(
@@ -117,6 +124,11 @@ function beforeClose(){  // 关闭动态编辑前提醒是否确认关闭
     ).then(() => {
         dialogVisible.value = false
     })
+}
+
+function goToWebpage() {
+    activeIndex.value = '0'
+    router.push('/webpage')
 }
 
 function logOut(){  // 登出
@@ -132,7 +144,7 @@ function logOut(){  // 登出
 }
 </script>
 
-<style>
+<style scoped>
 .el-container {
     display: flex;
     flex-direction: column;

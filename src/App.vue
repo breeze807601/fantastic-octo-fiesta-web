@@ -3,9 +3,6 @@
 </template>
 
 <script setup>
-// import router from '@/router'
-console.log("eee");
-// router.push("/login")
 </script>
 
 <style>

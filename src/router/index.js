@@ -1,11 +1,13 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import store from '@/store'
 import Login from '@/views/Login.vue'
 import Home from '@/views/Home.vue'
 import Register from '@/views/Register.vue'
 import HomePage from '@/components/HomePage.vue'
-import Tag from '@/components/Tag.vue'
+import Tag from '@/components/treadRelational/Tag.vue'
+import Details from "@/components/treadRelational/Details.vue";
+import TreadsList from "@/components/treadRelational/TreadsList.vue";
+import Webpage from "@/components/userRelational/Webpage.vue";
 
 const routes = [
   {
@@ -27,7 +29,26 @@ const routes = [
       {
         path: '/homePage',
         name: 'homePage',
-        component: HomePage
+        component: HomePage,
+        redirect: '/treadsList',
+        children:[
+            {
+              path: '/treadsList',
+              name: 'treadsList',
+              component: TreadsList,
+              meta: { keepAlive: true }
+            },
+            {
+              path: '/details',
+              name: 'details',
+              component: Details
+            }
+        ]
+      },
+      {
+        path: '/webpage',
+        name: 'webpage',
+        component: Webpage
       },
       {
         path: '/tag',
