@@ -9,9 +9,9 @@
                 <el-col :span="7">
                     <div>
                         <el-menu :default-active="activeIndex" mode="horizontal" @select="handleSelect">
-                            <el-menu-item index="1"><el-icon><HomeFilled /></el-icon>首页</el-menu-item>
-                            <el-menu-item index="2"><el-icon><CollectionTag /></el-icon>标签</el-menu-item>
-                            <el-menu-item index="3"><el-icon><MagicStick /></el-icon>动态</el-menu-item>
+                            <el-menu-item index="/homePage"><el-icon><HomeFilled /></el-icon>首页</el-menu-item>
+                            <el-menu-item index="/tag"><el-icon><CollectionTag /></el-icon>标签</el-menu-item>
+                            <el-menu-item index="/tag"><el-icon><MagicStick /></el-icon>动态</el-menu-item>
                         </el-menu>
                     </div>
                 </el-col>
@@ -37,7 +37,7 @@
                             </el-avatar>
                             <template #dropdown>
                                 <el-dropdown-menu>
-                                    <el-dropdown-item @click="goToWebpage">个人中心</el-dropdown-item>
+                                    <el-dropdown-item @click="toWebpage">个人中心</el-dropdown-item>
                                     <el-dropdown-item divided @click="logOut()">退出登录</el-dropdown-item>
                                 </el-dropdown-menu>
                             </template>
@@ -49,7 +49,12 @@
         <el-main style="flex: 1;background-color: #f5f5f5;">
             <el-row>
                 <el-col :span="16" :offset="1">
-                    <router-view />
+                    <router-view v-slot="{ Component, route }">
+                        <keep-alive>
+                            <component :is="Component" :key="route.name" v-if="route.meta.keepAlive"/>
+                        </keep-alive>
+                        <component :is="Component" :key="route.name" v-if="!route.meta.keepAlive"/>
+                    </router-view>
                 </el-col>
                 <el-col :span="5" :offset="1">
                     <el-card>
@@ -100,19 +105,11 @@ function search() {
 }
 
 // 标签切换页面
-const activeIndex = ref('1')
+const activeIndex = ref('/homePage')
 function handleSelect(key) {
     // 根据 key 的值来决定跳转到哪个路由
-    switch (key) {
-        case '1':
-            activeIndex.value = '1'
-            router.push('/homePage');
-            break;
-        case '2':
-            activeIndex.value = '2'
-            router.push('/tag');
-            break;
-    }
+    activeIndex.value = key;
+    router.push(activeIndex.value);
 }
 
 const dialogVisible = ref(false);  // 是否弹出发送动态编辑框
@@ -125,12 +122,10 @@ function beforeClose(){  // 关闭动态编辑前提醒是否确认关闭
         dialogVisible.value = false
     })
 }
-
-function goToWebpage() {
-    activeIndex.value = '0'
+function toWebpage(){
+    localStorage.setItem("id",userInfo.id)
     router.push('/webpage')
 }
-
 function logOut(){  // 登出
     ElMessageBox.confirm(
         '是否确认退出登录？',

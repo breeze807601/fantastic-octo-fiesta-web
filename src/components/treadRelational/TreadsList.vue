@@ -1,10 +1,10 @@
 <template>
     <edit/>
     <div :infinite-scroll-disabled="disabled" v-infinite-scroll="addList">
-        <tread v-for="tread in treadList" :key="tread.id" :tread="tread" @modFollow="modFollow"></tread>
+        <tread v-for="tread in treadList" :key="tread.id" :tread="tread" :open="true" @modFollow="modFollow"></tread>
     </div>
     <el-divider v-if="loading">
-        <el-icon><Loading /></el-icon>正在加载更多数据...
+        <el-icon class="is-loading"><Loading /></el-icon>正在加载更多数据...
     </el-divider>
     <el-divider v-if="noMore">
         已经到底了哟
@@ -62,8 +62,6 @@ function addList(){
         }, 1000);
     }
 }
-
-const icon = ref(false)
 // 修改关注状态
 function modFollow(toUserId,isFollow){
     for (let i=0;i<treadList.length;i++) {
@@ -72,13 +70,9 @@ function modFollow(toUserId,isFollow){
         }
     }
 }
-
-// TODO 评论相关
-const isOpen = ref(false)
-
 </script>
 
-<style>
+<style scoped>
 .card-header {
     display: flex;
     align-items: center;

@@ -2,7 +2,7 @@
     <el-card class="tread-card"  shadow="never" style="margin-bottom: 10px">
         <template #header>
             <div class="card-header">
-                <el-avatar :size="40" style="cursor: pointer;" @error="true" :src="tread.pic"/>
+                <el-avatar :size="40" style="cursor: pointer;" @error="true" :src="tread.pic" @click="toWebpage(tread.userId)"/>
                 <div class="info">
                     <span class="nickname">{{ tread.nickName }}</span>
                     <span class="time">{{ tread.createTime }}</span>
@@ -16,7 +16,10 @@
             </div>
         </template>
         <div>
-            <el-text size="large" line-clamp="5">
+            <el-text v-if="open" size="large" line-clamp="5">
+                <div v-html="tread.content"></div>
+            </el-text>
+            <el-text v-else size="large">
                 <div v-html="tread.content"></div>
             </el-text>
             <div v-if="tread.imageList.length > 0">
@@ -31,8 +34,8 @@
             </el-text>
         </div>
         <div style="display: flex;justify-content: space-between;">
-            <el-button type="text" @click="toDetails(tread.id)"><el-icon><View /></el-icon>详情</el-button>
-            <el-button type="text" @click="isOpen = !isOpen"><el-icon><ChatDotSquare /></el-icon>评论</el-button>
+            <el-button type="text" v-if="open" @click="toDetails(tread.id)"><el-icon><View /></el-icon>详情</el-button>
+            <el-button type="text" v-if="open" @click="isOpen = !isOpen"><el-icon><ChatDotSquare /></el-icon>评论</el-button>
             <el-button type="text" @click="icon = !icon">
                 <svg v-if="icon" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" width="16" height="16">
                     <path d="M885.9 533.7c16.8-22.2 26.1-49.4 26.1-77.7 0-44.9-25.1-87.4-65.5-111.1a67.67 67.67 0 0 0-34.3-9.3H572.4l6-122.9c1.4-29.7-9.1-57.9-29.5-79.4-20.5-21.5-48.1-33.4-77.9-33.4-52 0-98 35-111.8 85.1l-85.9 311H144c-17.7 0-32 14.3-32 32v364c0 17.7 14.3 32 32 32h601.3c9.2 0 18.2-1.8 26.5-5.4 47.6-20.3 78.3-66.8 78.3-118.4 0-12.6-1.8-25-5.4-37 16.8-22.2 26.1-49.4 26.1-77.7 0-12.6-1.8-25-5.4-37 16.8-22.2 26.1-49.4 26.1-77.7-0.2-12.6-2-25.1-5.6-37.1zM184 852V568h81v284h-81z m636.4-353l-21.9 19 13.9 25.4c4.6 8.4 6.9 17.6 6.9 27.3 0 16.5-7.2 32.2-19.6 43l-21.9 19 13.9 25.4c4.6 8.4 6.9 17.6 6.9 27.3 0 16.5-7.2 32.2-19.6 43l-21.9 19 13.9 25.4c4.6 8.4 6.9 17.6 6.9 27.3 0 22.4-13.2 42.6-33.6 51.8H329V564.8l99.5-360.5c5.2-18.9 22.5-32.2 42.2-32.3 7.6 0 15.1 2.2 21.1 6.7 9.9 7.4 15.2 18.6 14.6 30.5l-9.6 198.4h314.4C829 418.5 840 436.9 840 456c0 16.5-7.2 32.1-19.6 43z" fill="#1296db">
@@ -47,7 +50,8 @@
         </div>
         <div v-if="isOpen">
             <el-divider border-style="dashed" />
-            <comment :treadId="tread.id"></comment>
+<!--            <comment :treadId="tread.id"></comment>-->
+            <comment v-bind="{treadId: tread.id,toUserId: tread.userId,toUserNickname: tread.nickName,isDetails: false}"></comment>
         </div>
     </el-card>
     <el-image-viewer @close="showViewer = false" v-if="showViewer" :url-list="previewList" :initialIndex="num"/>
@@ -64,10 +68,11 @@ import router from "@/router";
 let userInfo = reactive(JSON.parse(localStorage.getItem("userInfo")))
 
 defineProps({
-    tread: String
+    tread: Object,
+    open: Boolean
 })
 
-const isOpen = ref(true)
+const isOpen = ref(false)
 
 // 预览图片
 const num = ref(0)  // 第一个预览图片的下标
@@ -91,13 +96,11 @@ const emits = defineEmits(['modFollow'])
 async function follow(toUserId,isFollow) {
     if (isFollow) {          // 取消关注
         await request.delete('/concentration/cancel', {params: {toUserId: toUserId}}).then(res => {
-            console.log(res)
             ElMessage.success("取消关注成功！")
         })
     } else {          // 关注用户
         const concentration = reactive({toUserId: toUserId,})
         await request.post('/concentration', concentration).then(res => {
-            console.log(res)
             ElMessage.success("关注成功！")
         })
     }
@@ -111,8 +114,36 @@ function toDetails(treadId){
         }
     })
 }
+function toWebpage(userId){
+    localStorage.setItem("id",userId)
+    router.push('/webpage')
+}
 </script>
 
-<style>
-
+<style scoped>
+.card-header {
+    display: flex;
+    align-items: center;
+}
+.info {
+    margin-left: 13px;
+}
+.nickname {
+    display: block;
+    font-weight: bold;
+    font-size: 14px; /* 调整字体大小 */
+}
+.time {
+    margin-top: 5px;
+    display: block;
+    font-size: 12px; /* 调整字体大小 */
+    color: #999;
+}
+.right-content {
+    margin-left: auto; /* 推动按钮到最右边 */
+}
+.el-tag{
+    margin-left: 5px;
+    margin-bottom: 5px;
+}
 </style>
