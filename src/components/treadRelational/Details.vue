@@ -52,7 +52,6 @@ async function getTread(){
     })
     await request.get('/tread/get',{params:{id: route.query.id}}).then(res => {
         tread.value = res.data;
-        console.log("getTread",res.data)
         loading.close();
         open.value = true;
     })

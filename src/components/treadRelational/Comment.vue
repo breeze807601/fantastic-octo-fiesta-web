@@ -26,13 +26,14 @@
                             <div v-html="item.comment.content" style="margin-bottom: 5px;font-size: 15px"></div>
                             <el-text size="small">
                                 {{item.comment.createTime}}
-                                <el-button type="text" size="small" @click="openReply(item.comment.userId, item.comment.nickname,item.comment.id)" :icon="ChatLineRound" link>
+                                <el-button type="text" size="small" :icon="ChatLineRound" link
+                                           @click="openReply(item.comment.userId, item.comment.nickname,item.comment.id)">
                                     回复
                                 </el-button>
                             </el-text>
                         </div>
-                        <!-- 子回复 -->
-                        <el-row v-if="item.replyPage.total > 0" v-for="(replyInfo, replyIndex) in item.replyPage.list">
+                        <!-- 子回复,不是详情页不显示 -->
+                        <el-row v-if="item.replyPage.total > 0 && isDetails" v-for="(replyInfo, replyIndex) in item.replyPage.list">
                             <el-col :span="2">
                                 <el-avatar :size="30" style="cursor: pointer;" @error="true" :src="replyInfo.userPic"/>
                             </el-col>
@@ -43,17 +44,11 @@
                                     {{replyInfo.createTime}}
                                     <el-button type="text" size="small" @click="openReply(replyInfo.userId, replyInfo.nickname,item.comment.id)" :icon="ChatLineRound" link>回复</el-button>
                                 </el-text>
-
                             </el-col>
                             <div style="margin-bottom: 5px" v-if="replyIndex === item.replyPage.list.length - 1">
-                                <el-button v-if="item.replyPage.total > item.replyPage.list.length && !pagination" @click="pagination=!pagination;moreReplyPage" type="text" size="small" link>
+                                <el-button v-if="item.replyPage.total > item.replyPage.list.length" @click="openReplyPage(item.comment)" type="text" size="small" link>
                                     共{{item.replyPage.total}}条回复 点击查看
                                 </el-button>
-                                <el-pagination  v-model:current-page="currentPage1"
-                                    size="small"
-                                    layout="prev, pager, next"
-                                    :total="item.replyPage.total"
-                                />
                             </div>
                         </el-row>
                     </el-col>
@@ -62,18 +57,28 @@
             </div>
         </div>
         <el-divider>
-            <el-button v-if="total > commentList.length && !isDetails" type="text" size="small" link @click="moreComment()">
-                <span style="font-size: 14px">共{{total}}条评论 点击查看更多</span>
+            <el-button v-if="commentPageQuery.total > commentList.length && !isDetails" type="text" size="small" link @click="toDetails()">
+                <span style="font-size: 14px">共{{commentPageQuery.total}}条评论 点击查看更多</span>
             </el-button>
-<!--            <el-pagination v-model:current-page="currentPage1" layout="prev, pager, next" :total="item.replyPage.total"/>-->
-            <span v-else>没有更多了哦</span>
+            <span v-else-if="!isDetails">没有更多了哦</span>
         </el-divider>
+        <div v-if="total > commentList.length && isDetails" style="display: flex;justify-content: center">
+            <el-config-provider :locale="zhCn">
+                <el-pagination v-model:current-page="commentPageQuery.pageNo"
+                               layout="total, prev, pager, next, jumper" :total="commentPageQuery.total" hide-on-single-page
+                               :page-size="commentPageQuery.pageSize" pager-count="6"
+                               @current-change="handleCurrentChange"/>
+            </el-config-provider>
+        </div>
     </div>
     <el-dialog v-model="replyDialog" title="回复" width="400" destroy-on-close :before-close="dialogClose" align-center>
         <el-input v-model="reply.content" type="textarea" :autosize="{ minRows: 2, maxRows: 4 }" placeholder="请输入回复内容"/>
         <div style="display: flex; justify-content: center;margin-top: 10px;">
             <el-button type="primary" @click="saveReply()">回复</el-button>
         </div>
+    </el-dialog>
+    <el-dialog v-model="replyInfoDialog" :title="replyPageQuery.total+'条回复'" width="400" destroy-on-close>
+        <reply-list :replyList="replyList"/>
     </el-dialog>
 </template>
 
@@ -82,8 +87,10 @@
 import {ref, reactive, defineProps, onMounted} from "vue";
 import request from "@/request/request";
 import {ChatLineRound} from "@element-plus/icons-vue"
-import {ElMessage, ElMessageBox} from "element-plus";
+import {ElMessage, ElMessageBox } from "element-plus";
+import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
 import router from "@/router";
+import ReplyList from "@/components/common/ReplyList.vue";
 
 let userInfo = reactive(JSON.parse(localStorage.getItem("userInfo")))
 
@@ -97,30 +104,24 @@ const props = defineProps({
 onMounted( async () => {
     await getCommentList()
 })
-// 评论回复列表数据
-const commentList = reactive([])
-const total = ref()
-// 评论传参
-const comment = reactive({
+// 评论相关
+const commentList = reactive([])   // 评论列表
+
+const comment = reactive({       // 评论info，用于保存评论
     treadsId: props.treadId,
     content: '',
-    toUserId: '',
-    toUserNickname: '',
-    parentId: ''
+    toUserId: props.toUserId,
+    toUserNickname: props.toUserNickname,
 })
-// 评论查询
-const commentPageQuery = ref({
+const commentPageQuery = ref({         // 评论查询条件
     treadsId: props.treadId,
     pageNo: 1,
-    pageSize: props.isDetails ? 10 : 5,
+    pageSize: props.isDetails ? 10 : 3,
+    replyPageNo: 1,
+    replyPageSize: props.isDetails ? 3 : 0,  // 不是详情页不查询
+    total: 0,   // 评论条数
 })
-const replyPageQuery = ref({
-    commentId: '',
-    pageNo: 1,
-    pageSize: props.isDetails ? 10 : 5,
-})
-// 评论保存
-async function saveComment(){
+async function saveComment(){          // 保存评论
     comment.toUserId = props.toUserId;
     comment.toUserNickname = props.toUserNickname;
     await request.post('/comment/save',comment).then(res => {
@@ -135,31 +136,37 @@ async function saveComment(){
         };
         // 时间排列，所以添加到数组的开头
         commentList.unshift(newCommentEntry);
-        if (!props.isDetails) {
-            commentList.splice(3, commentList.length - 3);
+        commentPageQuery.value.total += 1;
+        // 如果每页数量小于评论列表数量，则删除多余的评论
+        if (commentPageQuery.value.pageSize < commentPageQuery.value.total) {
+            commentList.splice(commentPageQuery.value.pageSize, commentList.length - commentPageQuery.value.pageSize);
         }
-        // 清空toUserId和toUserNickname，因为回复也会用到comment
-        comment.toUserId = '';
-        comment.toUserNickname = '';
         ElMessage.success("发送成功！")
+    })
+}
+async function getCommentList(){       // 获取评论列表
+    await request.get('/comment', {params: commentPageQuery.value}).then(res => {
+        commentList.length = 0;
+        commentList.push(...res.data.list)
+        commentPageQuery.value.total = parseInt(res.data.total)       // 转换成数字
     })
 }
 
 // 回复相关
-const reply = reactive({
+const reply = reactive({     // 回复info，用于保存
     toUserId: '',
     toUserNickname: '',
     content: '',
     parentId: ''
 })
 const replyDialog = ref(false) // 回复弹窗
-function openReply(toUserId, toUserNickname,parentId){   // 打开回复弹窗并赋值comment的info
+function openReply(toUserId, toUserNickname,parentId){   // 打开回复弹窗并赋值reply的info，方便保存
     reply.toUserId = toUserId;
     reply.toUserNickname = toUserNickname;
     reply.parentId = parentId;
     replyDialog.value = true
 }
-function dialogClose() {
+function dialogClose() {      // 关闭回复弹窗，清空reply的info
     ElMessageBox.confirm(
         '关闭回复窗口将不会保存编辑内容，确定关闭吗？',
         '提示',
@@ -172,7 +179,7 @@ function dialogClose() {
         replyDialog.value = false
     })
 }
-async function saveReply() {
+async function saveReply() {         // 保存回复
     await request.post('/comment/save',reply).then(res => {
         for (let i = 0; i < commentList.length; i++) {
             if (commentList[i].comment.id === reply.parentId) {
@@ -189,15 +196,31 @@ async function saveReply() {
         ElMessage.success("回复成功！")
     })
 }
-async function getCommentList(){
-    await request.get('/comment', {params: commentPageQuery.value}).then(res => {
-        commentList.push(...res.data.list)
-        if (!props.isDetails) {
-            commentList.splice(3, commentList.length - 3);
-        }
-        total.value = res.data.total
-        console.log("commentList",commentList)
+// 查看回复列表弹窗
+const replyInfoDialog = ref(false)    // 回复列表弹窗
+const replyList = reactive([])       // 回复列表
+const replyPageQuery = ref({         // 回复列表查询条件
+    commentId: '',
+    pageNo: 1,
+    pageSize: 3,
+    total: 0,
+})
+let commentIf = reactive({})  // 回复弹窗的主评论
+async function openReplyPage(comment) {   // 打开回复列表弹窗
+    replyPageQuery.value.commentId = comment.id;
+    commentIf = comment;
+    await request.get('/comment/reply', {params: replyPageQuery.value}).then(res => {
+        replyList.push(...res.data.list)
+        replyPageQuery.value.total = parseInt(res.data.total)
+        console.log("replyList",replyList)
+        replyInfoDialog.value = true
     })
+}
+
+// 主评论分页
+async function handleCurrentChange(val) {
+    commentPageQuery.value.pageNo = val;
+    await getCommentList()
 }
 async function moreComment(){
     if (props.isDetails) {
@@ -207,19 +230,12 @@ async function moreComment(){
         toDetails(props.treadId)
     }
 }
-async function moreReplyPage() {
-    if (props.isDetails) {
-
-    }
-}
-// 分页
-const pagination = ref(false)
 // 跳转详情页
-function toDetails(treadId){
+function toDetails(){
     router.push({
         path: '/details',
         query: {
-            id: treadId,
+            id: props.treadId,
         }
     })
 }
