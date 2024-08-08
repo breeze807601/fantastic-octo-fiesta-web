@@ -77,8 +77,8 @@
             <el-button type="primary" @click="saveReply()">回复</el-button>
         </div>
     </el-dialog>
-    <el-dialog v-model="replyInfoDialog" :title="replyPageQuery.total+'条回复'" width="400" destroy-on-close>
-        <reply-list :replyList="replyList"/>
+    <el-dialog v-model="replyInfoDialog" title="回复列表" width="600" destroy-on-close>
+        <reply-list ref="newPage" :commentIf="commentIf" @openReply="openReply"/>
     </el-dialog>
 </template>
 
@@ -118,7 +118,7 @@ const commentPageQuery = ref({         // 评论查询条件
     pageNo: 1,
     pageSize: props.isDetails ? 10 : 3,
     replyPageNo: 1,
-    replyPageSize: props.isDetails ? 3 : 0,  // 不是详情页不查询
+    replyPageSize: props.isDetails ? 4 : 0,  // 不是详情页不查询
     total: 0,   // 评论条数
 })
 async function saveComment(){          // 保存评论
@@ -179,6 +179,7 @@ function dialogClose() {      // 关闭回复弹窗，清空reply的info
         replyDialog.value = false
     })
 }
+const newPage = ref(null)
 async function saveReply() {         // 保存回复
     await request.post('/comment/save',reply).then(res => {
         for (let i = 0; i < commentList.length; i++) {
@@ -194,27 +195,16 @@ async function saveReply() {         // 保存回复
         reply.content = '';
         replyDialog.value = false;
         ElMessage.success("回复成功！")
+        // 子组件ref='newPage'，然后父组件调用子组件暴露的openReplyPage方法
+        newPage.value.getReplyPage()
     })
 }
 // 查看回复列表弹窗
 const replyInfoDialog = ref(false)    // 回复列表弹窗
-const replyList = reactive([])       // 回复列表
-const replyPageQuery = ref({         // 回复列表查询条件
-    commentId: '',
-    pageNo: 1,
-    pageSize: 3,
-    total: 0,
-})
 let commentIf = reactive({})  // 回复弹窗的主评论
 async function openReplyPage(comment) {   // 打开回复列表弹窗
-    replyPageQuery.value.commentId = comment.id;
     commentIf = comment;
-    await request.get('/comment/reply', {params: replyPageQuery.value}).then(res => {
-        replyList.push(...res.data.list)
-        replyPageQuery.value.total = parseInt(res.data.total)
-        console.log("replyList",replyList)
-        replyInfoDialog.value = true
-    })
+    replyInfoDialog.value = true
 }
 
 // 主评论分页
