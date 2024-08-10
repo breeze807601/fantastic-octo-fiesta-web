@@ -1,27 +1,33 @@
 <template>
     <div >
-        <el-card>
+        <el-card style="margin-bottom: 20px">
             <template #header>
                 <div style="text-align: center">
                     <span>个人主页</span>
                 </div>
             </template>
-            <div class="card-header">
+            <div class="card-header" v-if="isOpen">
                 <el-avatar :size="90" :src="userInfo.pic" />
                 <div class="info">
                     <span class="nickname">
                         {{ userInfo.nickname }}
                         <span style="margin-left: 10px"></span>
                         <el-tooltip :content="userInfo.sex ==='0' ? '男' : '女'" placement="bottom" effect="light">
-                            <el-icon v-if="userInfo.sex==='0'"><Male/></el-icon>
-                            <el-icon v-else><Female/></el-icon>
+                            <el-icon v-if="userInfo.sex==='0'" color="#79bbff"><Male/></el-icon>
+                            <el-icon v-else color="#f89898"><Female/></el-icon>
                         </el-tooltip>
                     </span>
-                    <span class="time">{{ userInfo.createTime+'粉丝' }}</span>
+                    <span class="time">{{ userInfo.fansNum +'粉丝  '  +  userInfo.followNum + '关注' }}</span>
                 </div>
+<!--                <div class="right-content">-->
+<!--                    <el-button v-if="userInfo.id !== JSON.parse(localStorage.getItem('userInfo')).id" color="#f89898" round plain-->
+<!--                               @click="follow(tread.userId, tread.isFollow)">-->
+<!--                        {{ tread.isFollow ? '取消关注' : '+ 关注' }}-->
+<!--                    </el-button>-->
+<!--                </div>-->
             </div>
         </el-card>
-
+        <treads-list v-if="isOpen" :userId="userInfo.id"/>
     </div>
 </template>
 
@@ -29,32 +35,39 @@
 import router from "@/router";
 import {onMounted, reactive, ref} from "vue";
 import request from "@/request/request";
+import TreadsList from "@/components/treadRelational/TreadsList.vue";
 
 onMounted( () => {
     getUserInfo()
 })
-let userInfo = reactive(JSON.parse(localStorage.getItem("userInfo")));
+
+let userInfo = reactive({});
 
 const isSelf = ref(false)   // true: 查看的是本人的主页，false: 查看的是其他人的主页
 
-let userId = ref(localStorage.getItem('id'))
-function getUserInfo() {
-    if (userInfo.id === userId.value) {
-        isSelf.value = true
-        // TODO 获取用户粉丝量和关注量
+let userId = ref(localStorage.getItem('id'))   // 需要查看的id
 
-    } else {
-        // TODO 获取用户信息
-        userInfo.id = userId.value
-        userInfo.nickname = '小明'
-        userInfo.pic = 'https://homework1015.oss-cn-beijing.aliyuncs.com/2024-07-25-19-50-149.png'
+const isOpen = ref(false)
+
+async function getUserInfo() {
+    if (JSON.parse(localStorage.getItem("userInfo")).id === userId.value) {
+        isSelf.value = true
+        // userInfo = JSON.parse(localStorage.getItem("userInfo"))
     }
-}
-async function getTreadsList(){
-    await request.get('/tread/get', {params: {id: userInfo.id}}).then(res => {
-        console.log("res",res)
+    // else {
+    //     await request.get('/user/getUserById', {params: {id: userId.value}}).then(res => {
+    //         userInfo = res.data
+    //     })
+    // }
+    await request.get('/user/getUserById', {params: {id: userId.value}}).then(res => {
+        userInfo = res.data
     })
+    // TODO 获取用户粉丝量和关注量
+
+    console.log("userInfo",userInfo)
+    isOpen.value = true
 }
+
 console.log(userInfo)
 </script>
 

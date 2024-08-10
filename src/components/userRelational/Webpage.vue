@@ -20,17 +20,14 @@
             </el-menu>
         </el-col>
         <el-col :span="13" :offset="1">
-            <router-view :userInfo="userInfo"/>
+            <router-view/>
         </el-col>
     </el-row>
 </template>
 
 <script setup>
 document.title = "社交媒体平台-个人主页";
-import {reactive} from "vue";
 import router from "@/router";
-
-let userInfo = reactive(JSON.parse(localStorage.getItem("userInfo")));
 
 function handleSelect(key) {
     // 根据 key 的值来决定跳转到哪个路由

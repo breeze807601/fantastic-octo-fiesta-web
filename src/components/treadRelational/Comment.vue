@@ -56,13 +56,14 @@
                 <hr v-if="index !== commentList.length - 1" style="border: none; height: 1px; background-color: #e8e7e7;"/>
             </div>
         </div>
-        <el-divider>
-            <el-button v-if="commentPageQuery.total > commentList.length && !isDetails" type="text" size="small" link @click="toDetails()">
-                <span style="font-size: 14px">共{{commentPageQuery.total}}条评论 点击查看更多</span>
-            </el-button>
-            <span v-else-if="!isDetails">没有更多了哦</span>
-        </el-divider>
-        <div v-if="total > commentList.length && isDetails" style="display: flex;justify-content: center">
+        <div v-if="!isDetails">
+            <el-divider v-if="commentPageQuery.total > commentList.length">
+                <el-button  type="text" size="small" link @click="toDetails()">
+                    <span style="font-size: 14px">共{{commentPageQuery.total}}条评论 点击查看更多</span>
+                </el-button>
+            </el-divider>
+        </div>
+        <div v-if="isDetails" style="display: flex;justify-content: center">
             <el-config-provider :locale="zhCn">
                 <el-pagination v-model:current-page="commentPageQuery.pageNo"
                                layout="total, prev, pager, next, jumper" :total="commentPageQuery.total" hide-on-single-page
@@ -70,6 +71,7 @@
                                @current-change="handleCurrentChange"/>
             </el-config-provider>
         </div>
+        <el-empty v-if="commentPageQuery.total===0" :image-size="50" description="暂时没有评论" />
     </div>
     <el-dialog v-model="replyDialog" title="回复" width="400" destroy-on-close :before-close="dialogClose" align-center>
         <el-input v-model="reply.content" type="textarea" :autosize="{ minRows: 2, maxRows: 4 }" placeholder="请输入回复内容"/>

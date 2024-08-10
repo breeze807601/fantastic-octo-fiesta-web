@@ -7,7 +7,7 @@
                     <span class="nickname">{{ tread.nickName }}</span>
                     <span class="time">{{ tread.createTime }}</span>
                 </div>
-                <div class="right-content">
+                <div class="right-content" v-if="!isUserIdDefined">
                     <el-button v-if="userInfo.id !== tread.userId" color="#f89898" round plain
                                @click="follow(tread.userId, tread.isFollow)">
                         {{ tread.isFollow ? '取消关注' : '+ 关注' }}
@@ -50,7 +50,6 @@
         </div>
         <div v-if="isOpen">
             <el-divider border-style="dashed" />
-<!--            <comment :treadId="tread.id"></comment>-->
             <comment v-bind="{treadId: tread.id,toUserId: tread.userId,toUserNickname: tread.nickName,isDetails: false}"></comment>
         </div>
     </el-card>
@@ -69,7 +68,8 @@ let userInfo = reactive(JSON.parse(localStorage.getItem("userInfo")))
 
 defineProps({
     tread: Object,
-    open: Boolean
+    open: Boolean,
+    isUserIdDefined: Boolean,
 })
 
 const isOpen = ref(false)

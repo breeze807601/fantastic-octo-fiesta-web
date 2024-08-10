@@ -1,7 +1,8 @@
 <template>
-    <edit/>
+    <!--  编辑要不是个人主页才出现  -->
+    <edit v-if="!isUserIdDefined"/>
     <div :infinite-scroll-disabled="disabled" v-infinite-scroll="addList">
-        <tread v-for="tread in treadList" :key="tread.id" :tread="tread" :open="true" @modFollow="modFollow"></tread>
+        <tread v-for="tread in treadList" :key="tread.id" :tread="tread" :isUserIdDefined="isUserIdDefined" :open="true" @modFollow="modFollow"/>
     </div>
     <el-divider v-if="loading">
         <el-icon class="is-loading"><Loading /></el-icon>正在加载更多数据...
@@ -12,12 +13,18 @@
 </template>
 
 <script setup>
-import edit from './Edit.vue'
 import request from "@/request/request";
-import {computed, onActivated, onDeactivated, onMounted, onUnmounted, reactive, ref, watch} from "vue";
+import {computed, onMounted, reactive, ref} from "vue";
 import tread from "@/components/treadRelational/Tread.vue";
+import edit from "@/components/treadRelational/Edit.vue"
 
 let userInfo = reactive(JSON.parse(localStorage.getItem("userInfo")))
+
+const props = defineProps({
+    userId: String,
+})
+
+const isUserIdDefined = computed(() => typeof props.userId !== 'undefined' && props.userId.trim() !== '')   // 判断userId是否有参数
 
 // 搜索
 window.addEventListener('search',function (e) {
@@ -42,15 +49,23 @@ const pageInfo = ref({
     pageSize: 2,
     total: 0,
     key: '',
+    userId: isUserIdDefined.value ? props.userId : ''
 })
 onMounted(async () => {
     await getList();
 });
 async function getList(){
-    await request.get('/tread/page', {params: pageInfo.value}).then(res => {
-        treadList.push(...res.data.list);
-        pageInfo.value.total = res.data.total;
-    })
+    if (isUserIdDefined.value) {
+        await request.get('/tread/getByUser', {params: pageInfo.value}).then(res => {
+            treadList.push(...res.data.list);
+            pageInfo.value.total = res.data.total;
+        })
+    }else {
+        await request.get('/tread/page', {params: pageInfo.value}).then(res => {
+            treadList.push(...res.data.list);
+            pageInfo.value.total = res.data.total;
+        })
+    }
 }
 function addList(){
     if (!noMore.value && !loading.value) {     // 只有当还有更多数据时才加载
