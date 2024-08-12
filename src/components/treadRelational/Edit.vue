@@ -23,7 +23,7 @@
                 <div style="flex: 1">
                     <el-popover :visible="popover" placement="bottom" :width="500" class="custom-popper">
                         <el-upload :http-request="httpRequest" :on-remove="handleRemove" :show-file-list="true"
-                                   multiple list-type="picture-card" :on-exceed="onExceed" :limit="9" >
+                                   multiple list-type="picture-card" :on-exceed="onExceed" :limit="9" accept="image/*">
                             <template #trigger>
                                 <el-icon><Plus /></el-icon>
                             </template>
@@ -102,7 +102,6 @@ async function uploadImage(){        // 上传图片
         formData.append("multipartFiles", file);
     })
     await request.post('/common/images',formData).then(res => {
-        console.log("uploadImage",res)
         tread.imageList = res.data;
     }).catch(err => {
         ElMessage.error(err.msg)
