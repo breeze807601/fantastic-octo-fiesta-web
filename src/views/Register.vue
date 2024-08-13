@@ -88,11 +88,9 @@ const registerFormRef = ref(null);
 
 const onRegisterClick = () => {
   registerFormRef.value.validate(valid => {
-    if (valid) {
-      // 表单验证成功，可以提交表单或执行其他操作
+    if (valid) {      // 表单验证成功
       register()
     } else {
-      // 验证失败，Element Plus会自动高亮错误的表单项
       ElMessage.error('请检查注册内容输入!');
     }
   });
@@ -101,7 +99,7 @@ const onRegisterClick = () => {
 const loading = ref(false)
 async function register(){
     loading.value = true;
-    if (user.pw != user.password) {
+    if (user.pw !== user.password) {
         ElMessage.error('两次密码不一致!');
         loading.value = false;
         return;
