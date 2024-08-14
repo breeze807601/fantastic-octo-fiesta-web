@@ -38,7 +38,7 @@
                     </span>
                 </div>
                 <div class="right-content">
-                    <el-button v-if="!isSelf" color="#f89898" round plain>
+                    <el-button v-if="!isSelf" :loading="modFollow" color="#f89898" round plain @click="follow()">
                         {{ userInfo.isFollow ? '取消关注' : '+ 关注' }}
                     </el-button>
                 </div>
@@ -205,6 +205,24 @@ async function httpRequest(data) {     // 添加图片
         userInfo.pic = res.data[0];
         modUserInfo(true)
     })
+}
+// 关注相关
+const modFollow = ref(false)       // 修改按钮loading状态，isFollow刷新时可以及时修改按钮文字信息
+async function follow() {
+    modFollow.value = true
+    if (userInfo.isFollow) {    // 已经关注,即要取消关注
+        await request.delete('/concentration/cancel', {params: {toUserId: userInfo.id}}).then(res => {
+            userInfo.isFollow = !userInfo.isFollow;
+            ElMessage.success("取消关注成功！")
+        })
+    } else {
+        const concentration = reactive({toUserId: userInfo.id})
+        await request.post('/concentration', concentration).then(res => {
+            userInfo.isFollow = !userInfo.isFollow;
+            ElMessage.success("关注成功！")
+        })
+    }
+    modFollow.value = false
 }
 </script>
 
