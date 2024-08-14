@@ -56,6 +56,7 @@ import {onMounted, reactive, ref} from "vue";
 import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
 import request from "@/request/request";
 import {ElMessage} from "element-plus";
+import router from "@/router";
 
 onMounted( () => {
     getFansList()
@@ -77,8 +78,8 @@ const fansList = reactive([])
 async function getFansList() {
     if (JSON.parse(localStorage.getItem("userInfo")).id === userId.value) {
         isSelf.value = true
-        pageInfo.value.userId = userId.value
     }
+    pageInfo.value.userId = userId.value
     await request.get("/concentration/get-fans",{params: pageInfo.value}).then(res => {
         fansList.length = 0;
         fansList.push(...res.data.list)
