@@ -56,7 +56,6 @@ import {onMounted, reactive, ref} from "vue";
 import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
 import request from "@/request/request";
 import {ElMessage} from "element-plus";
-import router from "@/router";
 
 onMounted( () => {
     getFansList()
