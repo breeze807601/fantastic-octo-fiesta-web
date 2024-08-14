@@ -31,7 +31,7 @@
                             {{ "时间" }}
                         </span>
                     </div>
-                    <div class="right-content">
+                    <div class="right-content" v-if="myId !== item.id">
                         <el-button color="#f89898" round plain @click="follow(item.id,item.isFollow)">
                             {{ item.isFollow ? '取消关注' : '+ 关注' }}
                         </el-button>
@@ -58,12 +58,14 @@ import request from "@/request/request";
 import {ElMessage} from "element-plus";
 
 onMounted( () => {
+    myId.value = JSON.parse(localStorage.getItem("userInfo")).id
     getFansList()
 })
 
 const isSelf = ref(false)   // true: 查看的是本人的主页，false: 查看的是其他人的主页
 
 let userId = ref(localStorage.getItem('id'))   // 需要查看的id
+let myId = ref()                                   // 当前用户id
 
 const isOpen = ref(false)
 const pageInfo = ref({
